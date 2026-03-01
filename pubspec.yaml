@@ -1,0 +1,32 @@
+name: techdebt_sherpa
+description: CLI for technical debt observability and hotspot analysis in Dart and Flutter repositories.
+version: 0.1.1
+homepage: https://github.com/CarlosFAdev/techdebt_sherpa
+repository: https://github.com/CarlosFAdev/techdebt_sherpa
+issue_tracker: https://github.com/CarlosFAdev/techdebt_sherpa/issues
+topics:
+  - flutter
+  - dart
+  - cli
+  - dev-tools
+  - code-quality
+
+environment:
+  sdk: ^3.3.0
+
+dependencies:
+  analyzer: ">=8.0.0 <12.0.0"
+  args: ^2.7.0
+  crypto: ^3.0.7
+  file: ^7.0.1
+  glob: ^2.1.3
+  meta: ^1.18.1
+  path: ^1.9.1
+  yaml: ^3.1.3
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.30.0
+
+executables:
+  techdebt_sherpa: techdebt_sherpa
