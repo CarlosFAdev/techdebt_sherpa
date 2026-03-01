@@ -5,3 +5,6 @@ build/
 .pub-cache/
 techdebt_reports/
 .techdebt/cache/
+.idea/
+.DS_Store
+pana_report.json
