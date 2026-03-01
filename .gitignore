@@ -1,0 +1,7 @@
+.dart_tool/
+.packages
+build/
+.pub/
+.pub-cache/
+techdebt_reports/
+.techdebt/cache/

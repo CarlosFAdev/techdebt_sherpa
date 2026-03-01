@@ -1,0 +1,8 @@
+@@@abc123|1700000000|Alice
+10	2	lib/a.dart
+1	0	lib/b.dart
+@@@def456|1701000000|Bob
+5	4	lib/a.dart
+-	-	binary.dat
+@@@fff999|1702000000|Alice
+2	3	lib/b.dart

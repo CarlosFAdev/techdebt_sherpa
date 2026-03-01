@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/techdebt_sherpa.report.v1.json",
+  "title": "TechDebtSherpaReportV1",
+  "type": "object",
+  "required": [
+    "metadata",
+    "config",
+    "global_scores",
+    "files",
+    "top_hotspots",
+    "directory_summaries",
+    "violations"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "metadata": {"type": "object"},
+    "config": {"type": "object"},
+    "global_scores": {
+      "type": "object",
+      "required": ["debt", "risk", "evolvability", "totals"],
+      "properties": {
+        "debt": {"type": "number"},
+        "risk": {"type": "number"},
+        "evolvability": {"type": "number"},
+        "totals": {"type": "object"}
+      }
+    },
+    "files": {"type": "array", "items": {"type": "object"}},
+    "top_hotspots": {"type": "array", "items": {"type": "object"}},
+    "directory_summaries": {"type": "array", "items": {"type": "object"}},
+    "violations": {"type": "array", "items": {"type": "string"}},
+    "baseline_delta": {"type": ["object", "null"]}
+  }
+}

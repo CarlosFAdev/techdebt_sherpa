@@ -1,0 +1,11 @@
+export 'analyzer_service.dart';
+export 'cache_service.dart';
+export 'config_service.dart';
+export 'coverage_service.dart';
+export 'discovery_service.dart';
+export 'git_service.dart';
+export 'report_service.dart';
+export 'report_diff_service.dart';
+export 'scoring_service.dart';
+export 'snapshot_service.dart';
+export 'trend_service.dart';

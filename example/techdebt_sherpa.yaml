@@ -1,0 +1,45 @@
+project:
+  root: .
+  language: dart
+include:
+  - lib/**.dart
+  - bin/**.dart
+exclude:
+  - '**/.dart_tool/**'
+  - '**/build/**'
+metrics:
+  enabled: [sloc, cyclomatic, nesting, mi, halstead, file_size, class_count, function_count, params_count]
+  thresholds:
+    cyclomatic:
+      warn: 10
+      fail: 20
+    nesting:
+      warn: 4
+      fail: 6
+    mi:
+      warn_below: 65
+      fail_below: 50
+git:
+  enabled: true
+  since_days: 180
+  churn_weights:
+    commits: 0.5
+    lines_changed: 0.5
+  hotspot_formula: '(norm_complexity + norm_churn) / 2'
+tests:
+  enabled: false
+  lcov_path: coverage/lcov.info
+scoring:
+  global_weights:
+    complexity: 0.30
+    churn: 0.30
+    size: 0.15
+    maintainability: 0.15
+    testgap: 0.10
+  normalization:
+    method: robust_zscore
+  output:
+    markdown:
+      include_tables: true
+      include_top_hotspots: 20
+      include_per_directory_summary: true
