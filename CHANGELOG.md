@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.7] - 2026-03-05
+
 ### Changed
 - Updated the report JSON schema canonical URI to `https://carlosf.dev/schemas/techdebt_sherpa.report.v1.json`.
 
