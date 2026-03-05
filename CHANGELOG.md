@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Constrained `meta` to `>=1.17.0 <1.18.0` to avoid Flutter SDK version-pin conflicts.
+
 ## [0.1.3] - 2026-03-01
 
 ### Changed
