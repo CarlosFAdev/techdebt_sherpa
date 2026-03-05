@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.5] - 2026-03-05
+
 ### Fixed
 - Relaxed `meta` constraint to `^1.17.0` so Flutter projects can resolve `1.17.0` while pub scoring still supports latest `1.18.x`.
 
