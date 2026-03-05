@@ -16,93 +16,36 @@ class ConfigService {
   /// Loads configuration from [configPath] or defaults when missing.
   SherpaConfig load({String? configPath, String root = '.'}) {
     final SherpaConfig defaults = SherpaConfig.defaults();
-    final String resolved = configPath ?? p.join(root, 'techdebt_sherpa.yaml');
-    if (!_fs.fileExists(resolved)) {
+    final String resolvedPath =
+        _resolvePath(configPath: configPath, root: root);
+    if (!_fs.fileExists(resolvedPath)) {
       return defaults;
     }
-    final dynamic parsed = loadYaml(_fs.readAsString(resolved));
+    final dynamic parsed = loadYaml(_fs.readAsString(resolvedPath));
     if (parsed is! YamlMap) {
       throw const FormatException('Config must be a YAML mapping.');
     }
 
-    final Map<dynamic, dynamic> map = parsed;
-    final Map<dynamic, dynamic> projectMap = _asMap(map['project']);
-    final Map<dynamic, dynamic> metricsMap = _asMap(map['metrics']);
-    final Map<dynamic, dynamic> gitMap = _asMap(map['git']);
-    final Map<dynamic, dynamic> testsMap = _asMap(map['tests']);
-    final Map<dynamic, dynamic> scoringMap = _asMap(map['scoring']);
-
-    final ProjectConfig project = ProjectConfig(
-      root: _string(projectMap['root']) ?? defaults.project.root,
-      language: _string(projectMap['language']) ?? defaults.project.language,
+    final _ConfigSections sections = _ConfigSections.fromRoot(parsed);
+    final ProjectConfig project = _buildProject(
+      sections.project,
+      defaults: defaults.project,
     );
-
-    final Map<dynamic, dynamic> thresholdsRaw = _asMap(
-      metricsMap['thresholds'],
+    final MetricsConfig metrics = _buildMetrics(
+      sections.metrics,
+      defaults: defaults.metrics,
     );
-    final Map<String, Threshold> thresholds = <String, Threshold>{
-      ...defaults.metrics.thresholds,
-      for (final MapEntry<dynamic, dynamic> entry in thresholdsRaw.entries)
-        '${entry.key}': _threshold(_asMap(entry.value)),
-    };
-
-    final MetricsConfig metrics = MetricsConfig(
-      enabled: _asStringList(metricsMap['enabled']) ?? defaults.metrics.enabled,
-      thresholds: thresholds,
+    final GitConfig git = _buildGit(sections.git, defaults: defaults.git);
+    final TestsConfig tests =
+        _buildTests(sections.tests, defaults: defaults.tests);
+    final ScoringConfig scoring = _buildScoring(
+      sections.scoring,
+      defaults: defaults.scoring,
     );
-
-    final Map<dynamic, dynamic> churnWeights = _asMap(gitMap['churn_weights']);
-    final GitConfig git = GitConfig(
-      enabled: _bool(gitMap['enabled']) ?? defaults.git.enabled,
-      sinceDays: _int(gitMap['since_days']) ?? defaults.git.sinceDays,
-      churnWeightCommits:
-          _double(churnWeights['commits']) ?? defaults.git.churnWeightCommits,
-      churnWeightLines: _double(churnWeights['lines_changed']) ??
-          defaults.git.churnWeightLines,
-      hotspotFormula:
-          _string(gitMap['hotspot_formula']) ?? defaults.git.hotspotFormula,
-      includeOwnershipProxy: _bool(gitMap['include_ownership_proxy']) ??
-          defaults.git.includeOwnershipProxy,
-    );
-
-    final TestsConfig tests = TestsConfig(
-      enabled: _bool(testsMap['enabled']) ?? defaults.tests.enabled,
-      lcovPath: _string(testsMap['lcov_path']) ?? defaults.tests.lcovPath,
-    );
-
-    final Map<dynamic, dynamic> globalWeightsRaw = _asMap(
-      scoringMap['global_weights'],
-    );
-    final Map<String, double> globalWeights = <String, double>{
-      ...defaults.scoring.globalWeights,
-      for (final MapEntry<dynamic, dynamic> entry in globalWeightsRaw.entries)
-        '${entry.key}': _double(entry.value) ?? 0,
-    };
-
-    final Map<dynamic, dynamic> normalization = _asMap(
-      scoringMap['normalization'],
-    );
-    final Map<dynamic, dynamic> output = _asMap(scoringMap['output']);
-    final Map<dynamic, dynamic> markdown = _asMap(output['markdown']);
-    final ScoringConfig scoring = ScoringConfig(
-      globalWeights: globalWeights,
-      normalizationMethod: _string(normalization['method']) ??
-          defaults.scoring.normalizationMethod,
-      output: MarkdownOutputConfig(
-        includeTables: _bool(markdown['include_tables']) ??
-            defaults.scoring.output.includeTables,
-        includeTopHotspots: _int(markdown['include_top_hotspots']) ??
-            defaults.scoring.output.includeTopHotspots,
-        includePerDirectorySummary:
-            _bool(markdown['include_per_directory_summary']) ??
-                defaults.scoring.output.includePerDirectorySummary,
-      ),
-    );
-
     final List<String> include =
-        _asStringList(map['include']) ?? defaults.include;
+        _asStringList(sections.root['include']) ?? defaults.include;
     final List<String> exclude =
-        _asStringList(map['exclude']) ?? defaults.exclude;
+        _asStringList(sections.root['exclude']) ?? defaults.exclude;
 
     _validate(scoring: scoring, git: git, metrics: metrics);
 
@@ -114,6 +57,99 @@ class ConfigService {
       git: git,
       tests: tests,
       scoring: scoring,
+    );
+  }
+
+  String _resolvePath({required String? configPath, required String root}) {
+    return configPath ?? p.join(root, 'techdebt_sherpa.yaml');
+  }
+
+  ProjectConfig _buildProject(
+    Map<dynamic, dynamic> projectMap, {
+    required ProjectConfig defaults,
+  }) {
+    return ProjectConfig(
+      root: _string(projectMap['root']) ?? defaults.root,
+      language: _string(projectMap['language']) ?? defaults.language,
+    );
+  }
+
+  MetricsConfig _buildMetrics(
+    Map<dynamic, dynamic> metricsMap, {
+    required MetricsConfig defaults,
+  }) {
+    final Map<dynamic, dynamic> thresholdsRaw =
+        _asMap(metricsMap['thresholds']);
+    final Map<String, Threshold> thresholds = <String, Threshold>{
+      ...defaults.thresholds,
+      for (final MapEntry<dynamic, dynamic> entry in thresholdsRaw.entries)
+        '${entry.key}': _threshold(_asMap(entry.value)),
+    };
+    return MetricsConfig(
+      enabled: _asStringList(metricsMap['enabled']) ?? defaults.enabled,
+      thresholds: thresholds,
+    );
+  }
+
+  GitConfig _buildGit(
+    Map<dynamic, dynamic> gitMap, {
+    required GitConfig defaults,
+  }) {
+    final Map<dynamic, dynamic> churnWeights = _asMap(gitMap['churn_weights']);
+    return GitConfig(
+      enabled: _bool(gitMap['enabled']) ?? defaults.enabled,
+      sinceDays: _int(gitMap['since_days']) ?? defaults.sinceDays,
+      churnWeightCommits:
+          _double(churnWeights['commits']) ?? defaults.churnWeightCommits,
+      churnWeightLines:
+          _double(churnWeights['lines_changed']) ?? defaults.churnWeightLines,
+      hotspotFormula:
+          _string(gitMap['hotspot_formula']) ?? defaults.hotspotFormula,
+      includeOwnershipProxy: _bool(gitMap['include_ownership_proxy']) ??
+          defaults.includeOwnershipProxy,
+    );
+  }
+
+  TestsConfig _buildTests(
+    Map<dynamic, dynamic> testsMap, {
+    required TestsConfig defaults,
+  }) {
+    return TestsConfig(
+      enabled: _bool(testsMap['enabled']) ?? defaults.enabled,
+      lcovPath: _string(testsMap['lcov_path']) ?? defaults.lcovPath,
+    );
+  }
+
+  ScoringConfig _buildScoring(
+    Map<dynamic, dynamic> scoringMap, {
+    required ScoringConfig defaults,
+  }) {
+    final Map<dynamic, dynamic> globalWeightsRaw = _asMap(
+      scoringMap['global_weights'],
+    );
+    final Map<String, double> globalWeights = <String, double>{
+      ...defaults.globalWeights,
+      for (final MapEntry<dynamic, dynamic> entry in globalWeightsRaw.entries)
+        '${entry.key}': _double(entry.value) ?? 0,
+    };
+
+    final Map<dynamic, dynamic> normalization =
+        _asMap(scoringMap['normalization']);
+    final Map<dynamic, dynamic> output = _asMap(scoringMap['output']);
+    final Map<dynamic, dynamic> markdown = _asMap(output['markdown']);
+    return ScoringConfig(
+      globalWeights: globalWeights,
+      normalizationMethod:
+          _string(normalization['method']) ?? defaults.normalizationMethod,
+      output: MarkdownOutputConfig(
+        includeTables:
+            _bool(markdown['include_tables']) ?? defaults.output.includeTables,
+        includeTopHotspots: _int(markdown['include_top_hotspots']) ??
+            defaults.output.includeTopHotspots,
+        includePerDirectorySummary:
+            _bool(markdown['include_per_directory_summary']) ??
+                defaults.output.includePerDirectorySummary,
+      ),
     );
   }
 
@@ -258,6 +294,46 @@ scoring:
         warnBelow: _double(map['warn_below']),
         failBelow: _double(map['fail_below']),
       );
+}
+
+class _ConfigSections {
+  const _ConfigSections({
+    required this.root,
+    required this.project,
+    required this.metrics,
+    required this.git,
+    required this.tests,
+    required this.scoring,
+  });
+
+  final Map<dynamic, dynamic> root;
+  final Map<dynamic, dynamic> project;
+  final Map<dynamic, dynamic> metrics;
+  final Map<dynamic, dynamic> git;
+  final Map<dynamic, dynamic> tests;
+  final Map<dynamic, dynamic> scoring;
+
+  static _ConfigSections fromRoot(Map<dynamic, dynamic> root) {
+    final Map<dynamic, dynamic> normalized = _asMapStatic(root);
+    return _ConfigSections(
+      root: normalized,
+      project: _asMapStatic(normalized['project']),
+      metrics: _asMapStatic(normalized['metrics']),
+      git: _asMapStatic(normalized['git']),
+      tests: _asMapStatic(normalized['tests']),
+      scoring: _asMapStatic(normalized['scoring']),
+    );
+  }
+
+  static Map<dynamic, dynamic> _asMapStatic(dynamic value) {
+    if (value is YamlMap) {
+      return value;
+    }
+    if (value is Map<dynamic, dynamic>) {
+      return value;
+    }
+    return <dynamic, dynamic>{};
+  }
 }
 
 /// Parses an ISO date string into UTC.

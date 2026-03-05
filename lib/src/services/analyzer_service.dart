@@ -173,56 +173,103 @@ class AnalyzerService {
     bool inBlock = false;
     int count = 0;
     for (final String rawLine in content.split('\n')) {
-      String line = rawLine.trim();
-      if (line.isEmpty) {
+      final _SlocLineResult result = _prepareSlocLine(
+        rawLine: rawLine,
+        inBlock: inBlock,
+      );
+      inBlock = result.inBlock;
+      if (result.line == null) {
         continue;
       }
-      if (inBlock) {
-        final int close = line.indexOf('*/');
-        if (close >= 0) {
-          inBlock = false;
-          line = line.substring(close + 2).trim();
-          if (line.isEmpty) {
-            continue;
-          }
-        } else {
-          continue;
-        }
-      }
-      if (line.startsWith('//')) {
+      final String? line = _removeInlineComment(result.line!);
+      if (line == null) {
         continue;
-      }
-      final int blockStart = line.indexOf('/*');
-      if (blockStart >= 0) {
-        final int blockEnd = line.indexOf('*/', blockStart + 2);
-        if (blockEnd >= 0) {
-          line =
-              '${line.substring(0, blockStart)} ${line.substring(blockEnd + 2)}'
-                  .trim();
-          if (line.isEmpty) {
-            continue;
-          }
-        } else {
-          inBlock = true;
-          line = line.substring(0, blockStart).trim();
-          if (line.isEmpty) {
-            continue;
-          }
-        }
-      }
-      final int inlineComment = line.indexOf('//');
-      if (inlineComment == 0) {
-        continue;
-      }
-      if (inlineComment > 0) {
-        line = line.substring(0, inlineComment).trim();
-        if (line.isEmpty) {
-          continue;
-        }
       }
       count += 1;
     }
     return count;
+  }
+
+  _SlocLineResult _prepareSlocLine({
+    required String rawLine,
+    required bool inBlock,
+  }) {
+    final String line = rawLine.trim();
+    if (line.isEmpty) {
+      return _SlocLineResult(line: null, inBlock: inBlock);
+    }
+    final _SlocLineResult afterLeading = _stripLeadingBlock(
+      line: line,
+      inBlock: inBlock,
+    );
+    if (afterLeading.line == null) {
+      return afterLeading;
+    }
+    if (afterLeading.line!.startsWith('//')) {
+      return _SlocLineResult(line: null, inBlock: afterLeading.inBlock);
+    }
+    return _stripInlineBlock(
+      line: afterLeading.line!,
+      inBlock: afterLeading.inBlock,
+    );
+  }
+
+  _SlocLineResult _stripLeadingBlock({
+    required String line,
+    required bool inBlock,
+  }) {
+    if (!inBlock) {
+      return _SlocLineResult(line: line, inBlock: false);
+    }
+    final int close = line.indexOf('*/');
+    if (close < 0) {
+      return const _SlocLineResult(line: null, inBlock: true);
+    }
+    final String stripped = line.substring(close + 2).trim();
+    if (stripped.isEmpty) {
+      return const _SlocLineResult(line: null, inBlock: false);
+    }
+    return _SlocLineResult(line: stripped, inBlock: false);
+  }
+
+  _SlocLineResult _stripInlineBlock({
+    required String line,
+    required bool inBlock,
+  }) {
+    final int blockStart = line.indexOf('/*');
+    if (blockStart < 0) {
+      return _SlocLineResult(line: line, inBlock: inBlock);
+    }
+    final int blockEnd = line.indexOf('*/', blockStart + 2);
+    if (blockEnd >= 0) {
+      final String collapsed =
+          '${line.substring(0, blockStart)} ${line.substring(blockEnd + 2)}'
+              .trim();
+      if (collapsed.isEmpty) {
+        return _SlocLineResult(line: null, inBlock: inBlock);
+      }
+      return _SlocLineResult(line: collapsed, inBlock: inBlock);
+    }
+    final String prefix = line.substring(0, blockStart).trim();
+    if (prefix.isEmpty) {
+      return const _SlocLineResult(line: null, inBlock: true);
+    }
+    return _SlocLineResult(line: prefix, inBlock: true);
+  }
+
+  String? _removeInlineComment(String line) {
+    final int inlineComment = line.indexOf('//');
+    if (inlineComment == 0) {
+      return null;
+    }
+    if (inlineComment < 0) {
+      return line;
+    }
+    final String stripped = line.substring(0, inlineComment).trim();
+    if (stripped.isEmpty) {
+      return null;
+    }
+    return stripped;
   }
 
   HalsteadMetrics _computeHalstead(Token beginToken) {
@@ -434,4 +481,11 @@ class _ComplexityVisitor extends RecursiveAstVisitor<void> {
     super.visitCatchClause(node);
     _leaveNesting();
   }
+}
+
+class _SlocLineResult {
+  const _SlocLineResult({required this.line, required this.inBlock});
+
+  final String? line;
+  final bool inBlock;
 }

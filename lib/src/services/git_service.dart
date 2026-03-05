@@ -49,27 +49,85 @@ class GitService {
     required bool useCache,
     required bool includeOwnershipProxy,
   }) async {
-    final bool available = await _isGitAvailable(repoRoot);
-    if (!available) {
-      return const GitAnalysisResult(
-        statsByFile: <String, GitFileStats>{},
-        head: null,
-        available: false,
-      );
+    if (!await _isGitAvailable(repoRoot)) {
+      return _emptyResult();
     }
-
     final String? head = await _gitHead(repoRoot);
     final String cacheKey =
         'head=$head|${window.cacheKey()}|owners=$includeOwnershipProxy';
 
-    if (useCache) {
-      final Map<String, Object?>? cached = _cache.readGit(cacheKey);
-      if (cached != null) {
-        return _fromCache(cached);
-      }
+    final GitAnalysisResult? cached = _readCachedResult(
+      cacheKey: cacheKey,
+      useCache: useCache,
+    );
+    if (cached != null) {
+      return cached;
     }
 
-    final Map<String, _Accumulator> acc = <String, _Accumulator>{};
+    final ProcessResultData? logResult = await _runGitLog(
+      repoRoot: repoRoot,
+      window: window,
+    );
+    if (logResult == null || logResult.exitCode != 0) {
+      return _resultWithHead(head, available: false);
+    }
+
+    final Map<String, GitFileStats> stats = _parseLogToStats(
+      logResult.stdout,
+      includeOwnershipProxy: includeOwnershipProxy,
+    );
+
+    final GitAnalysisResult result = GitAnalysisResult(
+      statsByFile: stats,
+      head: head,
+      available: true,
+    );
+
+    if (useCache) {
+      _cache.writeGit(cacheKey, _toCachePayload(result));
+    }
+    return result;
+  }
+
+  GitAnalysisResult _emptyResult() => const GitAnalysisResult(
+        statsByFile: <String, GitFileStats>{},
+        head: null,
+        available: false,
+      );
+
+  GitAnalysisResult _resultWithHead(String? head, {required bool available}) =>
+      GitAnalysisResult(
+        statsByFile: const <String, GitFileStats>{},
+        head: head,
+        available: available,
+      );
+
+  GitAnalysisResult? _readCachedResult({
+    required String cacheKey,
+    required bool useCache,
+  }) {
+    if (!useCache) {
+      return null;
+    }
+    final Map<String, Object?>? cached = _cache.readGit(cacheKey);
+    if (cached == null) {
+      return null;
+    }
+    return _fromCache(cached);
+  }
+
+  Future<ProcessResultData?> _runGitLog({
+    required String repoRoot,
+    required GitWindow window,
+  }) async {
+    try {
+      return await _runGit(_buildLogArgs(window), repoRoot: repoRoot);
+    } on TimeoutException {
+      return null;
+    }
+  }
+
+  List<String> _buildLogArgs(GitWindow window) {
     final List<String> args = <String>[
       'log',
       '--numstat',
@@ -86,94 +144,118 @@ class GitService {
       }
     }
     args.add('--');
+    return args;
+  }
 
-    final ProcessResultData logResult;
-    try {
-      logResult = await _runGit(args, repoRoot: repoRoot);
-    } on TimeoutException {
-      return GitAnalysisResult(
-        statsByFile: <String, GitFileStats>{},
-        head: head,
-        available: false,
-      );
-    }
-    if (logResult.exitCode != 0) {
-      return GitAnalysisResult(
-        statsByFile: <String, GitFileStats>{},
-        head: head,
-        available: false,
-      );
-    }
-
+  Map<String, GitFileStats> _parseLogToStats(
+    String stdout, {
+    required bool includeOwnershipProxy,
+  }) {
+    final Map<String, _Accumulator> accumulators = <String, _Accumulator>{};
     String? currentAuthor;
     int? currentTs;
-    for (final String line in const LineSplitter().convert(logResult.stdout)) {
+
+    for (final String line in const LineSplitter().convert(stdout)) {
       if (line.startsWith('@@@')) {
-        final List<String> parts = line.substring(3).split('|');
-        if (parts.length >= 3) {
-          currentTs = int.tryParse(parts[1]);
-          currentAuthor = parts[2];
-        }
+        final _CommitMeta meta = _parseCommitMeta(line);
+        currentTs = meta.timestamp;
+        currentAuthor = meta.author;
         continue;
       }
-      if (line.trim().isEmpty || line.startsWith(' ')) {
+      if (_shouldSkipLine(line)) {
         continue;
       }
       final _NumstatLine? parsed = _parseNumstatLine(line);
       if (parsed == null) {
         continue;
       }
-      final int added = parsed.added;
-      final int deleted = parsed.deleted;
-      final String path = parsed.path;
-      final _Accumulator fileAcc = acc.putIfAbsent(path, _Accumulator.new);
-      fileAcc.commits += 1;
-      fileAcc.added += added;
-      fileAcc.deleted += deleted;
-      if (currentTs != null) {
-        final DateTime dt = DateTime.fromMillisecondsSinceEpoch(
-          currentTs * 1000,
-          isUtc: true,
-        );
-        if (fileAcc.lastModified == null || dt.isAfter(fileAcc.lastModified!)) {
-          fileAcc.lastModified = dt;
-        }
-      }
-      if (includeOwnershipProxy && currentAuthor != null) {
-        fileAcc.authors.add(currentAuthor);
-      }
+      _recordNumstat(
+        accumulators: accumulators,
+        parsed: parsed,
+        currentTs: currentTs,
+        currentAuthor: currentAuthor,
+        includeOwnershipProxy: includeOwnershipProxy,
+      );
     }
 
-    final Map<String, GitFileStats> stats = <String, GitFileStats>{
-      for (final MapEntry<String, _Accumulator> e in acc.entries)
-        e.key: GitFileStats(
-          path: e.key,
-          commitCount: e.value.commits,
-          linesAdded: e.value.added,
-          linesDeleted: e.value.deleted,
-          lastModified: e.value.lastModified,
+    return _toGitStats(
+      accumulators,
+      includeOwnershipProxy: includeOwnershipProxy,
+    );
+  }
+
+  _CommitMeta _parseCommitMeta(String line) {
+    final List<String> parts = line.substring(3).split('|');
+    if (parts.length < 3) {
+      return const _CommitMeta();
+    }
+    return _CommitMeta(
+      timestamp: int.tryParse(parts[1]),
+      author: parts[2],
+    );
+  }
+
+  bool _shouldSkipLine(String line) =>
+      line.trim().isEmpty || line.startsWith(' ');
+
+  void _recordNumstat({
+    required Map<String, _Accumulator> accumulators,
+    required _NumstatLine parsed,
+    required int? currentTs,
+    required String? currentAuthor,
+    required bool includeOwnershipProxy,
+  }) {
+    final _Accumulator fileAcc =
+        accumulators.putIfAbsent(parsed.path, _Accumulator.new);
+    fileAcc.commits += 1;
+    fileAcc.added += parsed.added;
+    fileAcc.deleted += parsed.deleted;
+    _recordLastModified(fileAcc, currentTs);
+    if (includeOwnershipProxy && currentAuthor != null) {
+      fileAcc.authors.add(currentAuthor);
+    }
+  }
+
+  void _recordLastModified(_Accumulator acc, int? currentTs) {
+    if (currentTs == null) {
+      return;
+    }
+    final DateTime candidate = DateTime.fromMillisecondsSinceEpoch(
+      currentTs * 1000,
+      isUtc: true,
+    );
+    if (acc.lastModified == null || candidate.isAfter(acc.lastModified!)) {
+      acc.lastModified = candidate;
+    }
+  }
+
+  Map<String, GitFileStats> _toGitStats(
+    Map<String, _Accumulator> accumulators, {
+    required bool includeOwnershipProxy,
+  }) {
+    return <String, GitFileStats>{
+      for (final MapEntry<String, _Accumulator> entry in accumulators.entries)
+        entry.key: GitFileStats(
+          path: entry.key,
+          commitCount: entry.value.commits,
+          linesAdded: entry.value.added,
+          linesDeleted: entry.value.deleted,
+          lastModified: entry.value.lastModified,
           distinctAuthors:
-              includeOwnershipProxy ? e.value.authors.length : null,
+              includeOwnershipProxy ? entry.value.authors.length : null,
         ),
     };
+  }
 
-    final GitAnalysisResult result = GitAnalysisResult(
-      statsByFile: stats,
-      head: head,
-      available: true,
-    );
-
-    if (useCache) {
-      _cache.writeGit(cacheKey, <String, Object?>{
-        'available': true,
-        'head': head,
-        'stats': stats.map(
-          (String k, GitFileStats v) =>
-              MapEntry<String, Object?>(k, v.toJson()),
-        ),
-      });
-    }
-    return result;
+  Map<String, Object?> _toCachePayload(GitAnalysisResult result) {
+    return <String, Object?>{
+      'available': result.available,
+      'head': result.head,
+      'stats': result.statsByFile.map(
+        (String path, GitFileStats stats) =>
+            MapEntry<String, Object?>(path, stats.toJson()),
+      ),
+    };
   }
 
   Future<bool> _isGitAvailable(String repoRoot) async {
@@ -286,4 +368,11 @@ class _NumstatLine {
   final int added;
   final int deleted;
   final String path;
+}
+
+class _CommitMeta {
+  const _CommitMeta({this.timestamp, this.author});
+
+  final int? timestamp;
+  final String? author;
 }
