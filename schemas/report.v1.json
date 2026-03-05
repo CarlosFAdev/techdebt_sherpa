@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.com/schemas/techdebt_sherpa.report.v1.json",
+  "$id": "https://carlosf.dev/schemas/techdebt_sherpa.report.v1.json",
   "title": "TechDebtSherpaReportV1",
   "type": "object",
   "required": [

@@ -1,7 +1,7 @@
 # JSON Schema
 
 Report schema identifier:
-- `https://example.com/schemas/techdebt_sherpa.report.v1.json`
+- `https://carlosf.dev/schemas/techdebt_sherpa.report.v1.json`
 
 Top-level fields:
 - `$schema`

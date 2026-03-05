@@ -561,7 +561,7 @@ class SherpaReport {
   /// Converts this report to JSON-compatible data.
   Map<String, Object?> toJson() => <String, Object?>{
         r'$schema':
-            'https://example.com/schemas/techdebt_sherpa.report.v1.json',
+            'https://carlosf.dev/schemas/techdebt_sherpa.report.v1.json',
         'metadata': metadata.toJson(),
         'config': config.toJson(),
         'global_scores': global.toJson(),
