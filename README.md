@@ -39,10 +39,10 @@ techdebt_sherpa explain [options]
 
 ## Documentation
 
-- [Configuration Reference](docs/config-reference.md)
-- [Troubleshooting](docs/troubleshooting.md)
-- [Scoring Model](docs/scoring-model.md)
-- [Pub Score Playbook](docs/pub_score_playbook.md)
+- [Configuration Reference](doc/config-reference.md)
+- [Troubleshooting](doc/troubleshooting.md)
+- [Scoring Model](doc/scoring-model.md)
+- [Pub Score Playbook](doc/pub_score_playbook.md)
 
 ## Part of the Flutter Sherpa Suite
 

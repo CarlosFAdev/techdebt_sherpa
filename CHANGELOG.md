@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Relaxed `meta` constraint to `^1.17.0` so Flutter projects can resolve `1.17.0` while pub scoring still supports latest `1.18.x`.
+
 ## [0.1.4] - 2026-03-05
 
 ### Fixed
@@ -40,4 +43,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Static analyzer metrics, git history signals, scoring model, reports, snapshots, trends, and diffs.
 - Config system with defaults, docs, tests, and CI workflow.
 - MIT `LICENSE`, contributor policy files, and runnable API example.
-- Pub score tooling and gate script (`tool/pana_gate.dart`) plus `docs/pub_score_playbook.md`.
+- Pub score tooling and gate script (`tool/pana_gate.dart`) plus `doc/pub_score_playbook.md`.
