@@ -79,99 +79,12 @@ class CliApp {
     final ArgParser parser = ArgParser();
     parser.addFlag('help', abbr: 'h', negatable: false, help: 'Show help.');
 
-    final ArgParser scan = ArgParser()
-      ..addFlag('help', abbr: 'h', negatable: false)
-      ..addOption('config', help: 'Path to config YAML.')
-      ..addOption(
-        'format',
-        defaultsTo: 'both',
-        allowed: <String>['json', 'md', 'both'],
-      )
-      ..addOption('out', defaultsTo: 'techdebt_reports')
-      ..addOption('baseline')
-      ..addOption('since')
-      ..addOption('until')
-      ..addOption('commit-range')
-      ..addOption('max-files')
-      ..addMultiOption('include')
-      ..addMultiOption('exclude')
-      ..addMultiOption('fail-on')
-      ..addFlag(
-        'git',
-        defaultsTo: true,
-        negatable: true,
-        help: 'Enable git analysis.',
-      )
-      ..addFlag(
-        'resolve',
-        defaultsTo: true,
-        negatable: true,
-        help: 'Use analyzer resolution.',
-      )
-      ..addFlag(
-        'cache',
-        defaultsTo: true,
-        negatable: true,
-        help: 'Use cache/incremental mode.',
-      )
-      ..addOption('cache-dir', defaultsTo: '.techdebt/cache')
-      ..addFlag('quiet', defaultsTo: false, negatable: false)
-      ..addFlag('verbose', defaultsTo: false, negatable: false);
-
-    final ArgParser rank = ArgParser()
-      ..addFlag('help', abbr: 'h', negatable: false)
-      ..addOption('top', defaultsTo: '20')
-      ..addOption(
-        'format',
-        defaultsTo: 'table',
-        allowed: <String>['table', 'json'],
-      )
-      ..addOption('config')
-      ..addFlag('quiet', defaultsTo: false, negatable: false)
-      ..addFlag('verbose', defaultsTo: false, negatable: false);
-
-    final ArgParser diff = ArgParser()
-      ..addFlag('help', abbr: 'h', negatable: false)
-      ..addOption('left')
-      ..addOption('right')
-      ..addOption(
-        'format',
-        defaultsTo: 'both',
-        allowed: <String>['json', 'md', 'both'],
-      )
-      ..addFlag('quiet', defaultsTo: false, negatable: false)
-      ..addFlag('verbose', defaultsTo: false, negatable: false);
-
-    final ArgParser snapshot = ArgParser()
-      ..addFlag('help', abbr: 'h', negatable: false)
-      ..addOption('label')
-      ..addOption('config')
-      ..addFlag('quiet', defaultsTo: false, negatable: false)
-      ..addFlag('verbose', defaultsTo: false, negatable: false);
-
-    final ArgParser trend = ArgParser()
-      ..addFlag('help', abbr: 'h', negatable: false)
-      ..addOption(
-        'format',
-        defaultsTo: 'both',
-        allowed: <String>['md', 'json', 'both'],
-      )
-      ..addOption('window')
-      ..addFlag('quiet', defaultsTo: false, negatable: false)
-      ..addFlag('verbose', defaultsTo: false, negatable: false);
-
-    final ArgParser explain = ArgParser()
-      ..addFlag('help', abbr: 'h', negatable: false)
-      ..addOption('metric')
-      ..addFlag('quiet', defaultsTo: false, negatable: false)
-      ..addFlag('verbose', defaultsTo: false, negatable: false);
-
-    parser.addCommand('scan', scan);
-    parser.addCommand('rank', rank);
-    parser.addCommand('diff', diff);
-    parser.addCommand('snapshot', snapshot);
-    parser.addCommand('trend', trend);
-    parser.addCommand('explain', explain);
+    parser.addCommand('scan', _scanParser());
+    parser.addCommand('rank', _rankParser());
+    parser.addCommand('diff', _diffParser());
+    parser.addCommand('snapshot', _snapshotParser());
+    parser.addCommand('trend', _trendParser());
+    parser.addCommand('explain', _explainParser());
 
     return parser;
   }
@@ -193,6 +106,93 @@ class CliApp {
     stdout
         .writeln('Use `techdebt_sherpa <command> --help` for command options.');
   }
+
+  ArgParser _scanParser() => ArgParser()
+    ..addFlag('help', abbr: 'h', negatable: false)
+    ..addOption('config', help: 'Path to config YAML.')
+    ..addOption(
+      'format',
+      defaultsTo: 'both',
+      allowed: <String>['json', 'md', 'both'],
+    )
+    ..addOption('out', defaultsTo: 'techdebt_reports')
+    ..addOption('baseline')
+    ..addOption('since')
+    ..addOption('until')
+    ..addOption('commit-range')
+    ..addOption('max-files')
+    ..addMultiOption('include')
+    ..addMultiOption('exclude')
+    ..addMultiOption('fail-on')
+    ..addFlag(
+      'git',
+      defaultsTo: true,
+      negatable: true,
+      help: 'Enable git analysis.',
+    )
+    ..addFlag(
+      'resolve',
+      defaultsTo: true,
+      negatable: true,
+      help: 'Use analyzer resolution.',
+    )
+    ..addFlag(
+      'cache',
+      defaultsTo: true,
+      negatable: true,
+      help: 'Use cache/incremental mode.',
+    )
+    ..addOption('cache-dir', defaultsTo: '.techdebt/cache')
+    ..addFlag('quiet', defaultsTo: false, negatable: false)
+    ..addFlag('verbose', defaultsTo: false, negatable: false);
+
+  ArgParser _rankParser() => ArgParser()
+    ..addFlag('help', abbr: 'h', negatable: false)
+    ..addOption('top', defaultsTo: '20')
+    ..addOption(
+      'format',
+      defaultsTo: 'table',
+      allowed: <String>['table', 'json'],
+    )
+    ..addOption('config')
+    ..addFlag('quiet', defaultsTo: false, negatable: false)
+    ..addFlag('verbose', defaultsTo: false, negatable: false);
+
+  ArgParser _diffParser() => ArgParser()
+    ..addFlag('help', abbr: 'h', negatable: false)
+    ..addOption('left')
+    ..addOption('right')
+    ..addOption(
+      'format',
+      defaultsTo: 'both',
+      allowed: <String>['json', 'md', 'both'],
+    )
+    ..addFlag('quiet', defaultsTo: false, negatable: false)
+    ..addFlag('verbose', defaultsTo: false, negatable: false);
+
+  ArgParser _snapshotParser() => ArgParser()
+    ..addFlag('help', abbr: 'h', negatable: false)
+    ..addOption('label')
+    ..addOption('config')
+    ..addFlag('quiet', defaultsTo: false, negatable: false)
+    ..addFlag('verbose', defaultsTo: false, negatable: false);
+
+  ArgParser _trendParser() => ArgParser()
+    ..addFlag('help', abbr: 'h', negatable: false)
+    ..addOption(
+      'format',
+      defaultsTo: 'both',
+      allowed: <String>['md', 'json', 'both'],
+    )
+    ..addOption('window')
+    ..addFlag('quiet', defaultsTo: false, negatable: false)
+    ..addFlag('verbose', defaultsTo: false, negatable: false);
+
+  ArgParser _explainParser() => ArgParser()
+    ..addFlag('help', abbr: 'h', negatable: false)
+    ..addOption('metric')
+    ..addFlag('quiet', defaultsTo: false, negatable: false)
+    ..addFlag('verbose', defaultsTo: false, negatable: false);
 
   Future<int> _runScan(ArgResults args, Logger logger) async {
     final _ScanOutcome outcome = await _scanInternal(
@@ -373,7 +373,8 @@ class CliApp {
       'Default weights: complexity=0.30 churn=0.30 size=0.15 maintainability=0.15 testgap=0.10.',
     );
     stdout.writeln('\nMetrics definitions:');
-    defs.forEach((String k, String v) => stdout.writeln('- $k: $v'));
+    defs.forEach(
+        (String key, String value) => stdout.writeln('- $key: $value'));
     return ExitCodes.success;
   }
 
@@ -389,32 +390,19 @@ class CliApp {
       root: root,
     );
 
-    final List<String> include = <String>[
-      ...fileConfig.include,
-      ...(args['include'] as List<String>?) ?? <String>[],
-    ];
-    final List<String> exclude = <String>[
-      ...fileConfig.exclude,
-      ...(args['exclude'] as List<String>?) ?? <String>[],
-    ];
-
-    final int? maxFiles = int.tryParse(args['max-files'] as String? ?? '');
-    final DiscoveryService discovery = DiscoveryService(_fs);
-    final List<String> files = discovery.discoverDartFiles(
+    final _IncludeExclude includeExclude = _resolveIncludeExclude(
+      args: args,
+      config: fileConfig,
+    );
+    final List<String> files = _discoverFiles(
       root: root,
-      include: include,
-      exclude: exclude,
-      maxFiles: maxFiles,
+      includeExclude: includeExclude,
+      maxFilesArg: args['max-files'] as String?,
     );
     logger.debug('Discovered ${files.length} Dart files.');
 
-    final bool useCache = args['cache'] as bool? ?? true;
-    final String cacheDir = args['cache-dir'] as String? ?? '.techdebt/cache';
-    final CacheService cache = CacheService(
-      _fs,
-      cacheDir: cacheDir,
-      toolVersion: toolVersion,
-    );
+    final bool useCache = _useCache(args);
+    final CacheService cache = _buildCacheService(args);
 
     final AnalyzerService analyzer = AnalyzerService(
       _fs,
@@ -428,39 +416,21 @@ class CliApp {
       useCache: useCache,
     );
 
-    Map<String, GitFileStats> gitStats = <String, GitFileStats>{};
-    String? gitHead;
-    if (args['git'] as bool? ?? fileConfig.git.enabled) {
-      final GitService git = GitService(_runner, cache);
-      final DateTime? since =
-          (args['commit-range'] as String?)?.isNotEmpty ?? false
-              ? null
-              : (parseDate(args['since'] as String?) ??
-                  DateTime.now().toUtc().subtract(
-                        Duration(days: fileConfig.git.sinceDays),
-                      ));
-      final DateTime? until = parseDate(args['until'] as String?);
-      final String? range = args['commit-range'] as String?;
-      final GitAnalysisResult gitResult = await git.collect(
-        repoRoot: root,
-        window: GitWindow(since: since, until: until, commitRange: range),
-        useCache: useCache,
-        includeOwnershipProxy: fileConfig.git.includeOwnershipProxy,
-      );
-      gitStats = gitResult.statsByFile;
-      gitHead = gitResult.head;
-    }
-
-    Map<String, double> coverage = <String, double>{};
-    if (fileConfig.tests.enabled) {
-      coverage = await CoverageService(
-        _fs,
-      ).loadCoverage(root: root, lcovPath: fileConfig.tests.lcovPath);
-    }
+    final _GitOutcome gitOutcome = await _collectGitSignals(
+      args: args,
+      config: fileConfig,
+      cache: cache,
+      root: root,
+      useCache: useCache,
+    );
+    final Map<String, double> coverage = await _loadCoverage(
+      root: root,
+      config: fileConfig,
+    );
 
     final ScoringResult scored = ScoringService().score(
       metrics: analyzed,
-      git: gitStats,
+      git: gitOutcome.statsByFile,
       coverage: coverage,
       config: fileConfig,
     );
@@ -479,7 +449,7 @@ class CliApp {
         schemaVersion: schemaVersion,
         timestamp: DateTime.now().toUtc(),
         configHash: sha256OfString(fileConfig.stableJson()),
-        gitHead: gitHead,
+        gitHead: gitOutcome.head,
       ),
       config: fileConfig,
       global: scored.global,
@@ -500,6 +470,106 @@ class CliApp {
     }
 
     return _ScanOutcome(report);
+  }
+
+  _IncludeExclude _resolveIncludeExclude({
+    required ArgResults args,
+    required SherpaConfig config,
+  }) {
+    return _IncludeExclude(
+      include: <String>[
+        ...config.include,
+        ...(args['include'] as List<String>?) ?? <String>[],
+      ],
+      exclude: <String>[
+        ...config.exclude,
+        ...(args['exclude'] as List<String>?) ?? <String>[],
+      ],
+    );
+  }
+
+  List<String> _discoverFiles({
+    required String root,
+    required _IncludeExclude includeExclude,
+    required String? maxFilesArg,
+  }) {
+    final int? maxFiles = int.tryParse(maxFilesArg ?? '');
+    return DiscoveryService(_fs).discoverDartFiles(
+      root: root,
+      include: includeExclude.include,
+      exclude: includeExclude.exclude,
+      maxFiles: maxFiles,
+    );
+  }
+
+  bool _useCache(ArgResults args) => args['cache'] as bool? ?? true;
+
+  CacheService _buildCacheService(ArgResults args) {
+    return CacheService(
+      _fs,
+      cacheDir: args['cache-dir'] as String? ?? '.techdebt/cache',
+      toolVersion: toolVersion,
+    );
+  }
+
+  Future<_GitOutcome> _collectGitSignals({
+    required ArgResults args,
+    required SherpaConfig config,
+    required CacheService cache,
+    required String root,
+    required bool useCache,
+  }) async {
+    if (!(args['git'] as bool? ?? config.git.enabled)) {
+      return const _GitOutcome(
+        statsByFile: <String, GitFileStats>{},
+        head: null,
+      );
+    }
+
+    final String? commitRange = args['commit-range'] as String?;
+    final DateTime? since = _resolveSince(
+      sinceArg: args['since'] as String?,
+      commitRange: commitRange,
+      sinceDays: config.git.sinceDays,
+    );
+    final GitAnalysisResult gitResult =
+        await GitService(_runner, cache).collect(
+      repoRoot: root,
+      window: GitWindow(
+        since: since,
+        until: parseDate(args['until'] as String?),
+        commitRange: commitRange,
+      ),
+      useCache: useCache,
+      includeOwnershipProxy: config.git.includeOwnershipProxy,
+    );
+    return _GitOutcome(
+        statsByFile: gitResult.statsByFile, head: gitResult.head);
+  }
+
+  DateTime? _resolveSince({
+    required String? sinceArg,
+    required String? commitRange,
+    required int sinceDays,
+  }) {
+    if ((commitRange ?? '').isNotEmpty) {
+      return null;
+    }
+    return parseDate(sinceArg) ??
+        DateTime.now().toUtc().subtract(Duration(days: sinceDays));
+  }
+
+  Future<Map<String, double>> _loadCoverage({
+    required String root,
+    required SherpaConfig config,
+  }) async {
+    if (!config.tests.enabled) {
+      return <String, double>{};
+    }
+    return CoverageService(_fs).loadCoverage(
+      root: root,
+      lcovPath: config.tests.lcovPath,
+    );
   }
 
   Map<String, Object?> _readJsonFile(String path) {
@@ -588,4 +658,18 @@ class _ScanOutcome {
   const _ScanOutcome(this.report);
 
   final SherpaReport report;
+}
+
+class _IncludeExclude {
+  const _IncludeExclude({required this.include, required this.exclude});
+
+  final List<String> include;
+  final List<String> exclude;
+}
+
+class _GitOutcome {
+  const _GitOutcome({required this.statsByFile, required this.head});
+
+  final Map<String, GitFileStats> statsByFile;
+  final String? head;
 }
