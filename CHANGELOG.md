@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Reduced complexity in git/config/analyzer services while preserving existing behavior.
+- Refactored CLI scan flow into smaller internal helpers to improve maintainability and hotspot scores.
+
 ## [0.1.5] - 2026-03-05
 
 ### Fixed
