@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.8] - 2026-03-11
+
 ### Changed
 - Added `dep_sherpa` to the Flutter Sherpa Suite links in `README.md`.
 
