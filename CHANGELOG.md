@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-04-21
+
+### Changed
+- Standardized default scan output to `reports/` and canonical filenames to `techdebt_sherpa.json` and `techdebt_sherpa.md`.
+- Added report JSON summary fields for schema version, high-severity issue count, hotspot count, and total debt indicators.
+
+### Fixed
+- Relaxed the `analyzer` constraint to include `12.1.0` and newer `12.x` releases so pub.dev scoring does not lose points on stale constraints.
+
 ## [0.1.8] - 2026-03-11
 
 ### Changed
