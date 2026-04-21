@@ -115,7 +115,7 @@ class CliApp {
       defaultsTo: 'both',
       allowed: <String>['json', 'md', 'both'],
     )
-    ..addOption('out', defaultsTo: 'techdebt_reports')
+    ..addOption('out', defaultsTo: 'reports')
     ..addOption('baseline')
     ..addOption('since')
     ..addOption('until')
@@ -463,7 +463,7 @@ class CliApp {
     if (writeFiles) {
       _writeReportFiles(
         report: report,
-        outDir: args['out'] as String? ?? 'techdebt_reports',
+        outDir: args['out'] as String? ?? 'reports',
         format: args['format'] as String? ?? 'both',
         baselineDelta: baselineDelta,
       );
@@ -640,15 +640,20 @@ class CliApp {
     _fs.createDir(outDir);
     final ReportService reports = ReportService();
     if (format == 'json' || format == 'both') {
+      final jsonReport = reports.renderJson(report);
       _fs.writeAsString(
-        p.join(outDir, 'techdebt_report.json'),
-        reports.renderJson(report),
+        p.join(outDir, 'techdebt_sherpa.json'),
+        jsonReport,
       );
     }
     if (format == 'md' || format == 'both') {
+      final markdownReport = reports.renderMarkdown(
+        report,
+        baselineDelta: baselineDelta,
+      );
       _fs.writeAsString(
-        p.join(outDir, 'techdebt_report.md'),
-        reports.renderMarkdown(report, baselineDelta: baselineDelta),
+        p.join(outDir, 'techdebt_sherpa.md'),
+        markdownReport,
       );
     }
   }

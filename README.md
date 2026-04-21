@@ -23,8 +23,13 @@ techdebt_sherpa --help
 ## Quick Start
 
 ```bash
-techdebt_sherpa scan --format both --out techdebt_reports
+techdebt_sherpa scan --format both --out reports
 ```
+
+Canonical report files written by `scan`:
+
+- `reports/techdebt_sherpa.json`
+- `reports/techdebt_sherpa.md`
 
 ## Commands
 

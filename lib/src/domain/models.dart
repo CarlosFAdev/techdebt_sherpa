@@ -559,20 +559,33 @@ class SherpaReport {
   final Map<String, Object?>? baselineDelta;
 
   /// Converts this report to JSON-compatible data.
-  Map<String, Object?> toJson() => <String, Object?>{
-        r'$schema':
-            'https://carlosf.dev/schemas/techdebt_sherpa.report.v1.json',
-        'metadata': metadata.toJson(),
-        'config': config.toJson(),
-        'global_scores': global.toJson(),
-        'files': files.map((FileReportEntry e) => e.toJson()).toList(),
-        'top_hotspots':
-            topHotspots.map((FileReportEntry e) => e.toJson()).toList(),
-        'directory_summaries':
-            directories.map((DirectorySummary d) => d.toJson()).toList(),
-        'violations': violations,
-        'baseline_delta': baselineDelta,
-      };
+  Map<String, Object?> toJson() {
+    final highSeverityIssues = files.where((entry) {
+      return entry.thresholdViolations.any((violation) {
+        return violation.contains('fail');
+      });
+    }).length;
+
+    return <String, Object?>{
+      r'$schema': 'https://carlosf.dev/schemas/techdebt_sherpa.report.v1.json',
+      'schema_version': '0.1.0',
+      'summary': <String, Object?>{
+        'high_severity_issues': highSeverityIssues,
+        'hotspot_count': topHotspots.length,
+        'total_debt_indicators': files.length,
+      },
+      'metadata': metadata.toJson(),
+      'config': config.toJson(),
+      'global_scores': global.toJson(),
+      'files': files.map((FileReportEntry e) => e.toJson()).toList(),
+      'top_hotspots':
+          topHotspots.map((FileReportEntry e) => e.toJson()).toList(),
+      'directory_summaries':
+          directories.map((DirectorySummary d) => d.toJson()).toList(),
+      'violations': violations,
+      'baseline_delta': baselineDelta,
+    };
+  }
 
   /// Returns a pretty JSON string for human inspection.
   String prettyJson() => const JsonEncoder.withIndent('  ').convert(toJson());
