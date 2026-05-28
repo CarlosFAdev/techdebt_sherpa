@@ -481,6 +481,43 @@ class DirectorySummary {
       };
 }
 
+/// A technical debt finding that is not tied to a source file metric row.
+@immutable
+class DebtFinding {
+  /// Creates a [DebtFinding].
+  const DebtFinding({
+    required this.category,
+    required this.severity,
+    required this.message,
+    required this.recommendation,
+    this.source,
+    this.dependency,
+    this.signals = const <String>[],
+    this.details = const <String, Object?>{},
+  });
+
+  final String category;
+  final String severity;
+  final String message;
+  final String recommendation;
+  final String? source;
+  final String? dependency;
+  final List<String> signals;
+  final Map<String, Object?> details;
+
+  /// Converts this finding to JSON-compatible data.
+  Map<String, Object?> toJson() => <String, Object?>{
+        'category': category,
+        'severity': severity,
+        'message': message,
+        'recommendation': recommendation,
+        'source': source,
+        'dependency': dependency,
+        'signals': signals,
+        'details': details,
+      };
+}
+
 /// Global aggregate score object.
 @immutable
 class GlobalScores {
@@ -546,6 +583,7 @@ class SherpaReport {
     required this.topHotspots,
     required this.directories,
     required this.violations,
+    this.debtFindings = const <DebtFinding>[],
     this.baselineDelta,
   });
 
@@ -556,15 +594,28 @@ class SherpaReport {
   final List<FileReportEntry> topHotspots;
   final List<DirectorySummary> directories;
   final List<String> violations;
+  final List<DebtFinding> debtFindings;
   final Map<String, Object?>? baselineDelta;
 
   /// Converts this report to JSON-compatible data.
   Map<String, Object?> toJson() {
     final highSeverityIssues = files.where((entry) {
-      return entry.thresholdViolations.any((violation) {
-        return violation.contains('fail');
-      });
-    }).length;
+          return entry.thresholdViolations.any((violation) {
+            return violation.contains('fail');
+          });
+        }).length +
+        debtFindings
+            .where((DebtFinding finding) =>
+                finding.severity == 'high' || finding.severity == 'critical')
+            .length;
+    final Map<String, int> categoryCounts = <String, int>{};
+    final Map<String, int> severityCounts = <String, int>{};
+    for (final DebtFinding finding in debtFindings) {
+      categoryCounts.update(finding.category, (int value) => value + 1,
+          ifAbsent: () => 1);
+      severityCounts.update(finding.severity, (int value) => value + 1,
+          ifAbsent: () => 1);
+    }
 
     return <String, Object?>{
       r'$schema': 'https://carlosf.dev/schemas/techdebt_sherpa.report.v1.json',
@@ -572,7 +623,9 @@ class SherpaReport {
       'summary': <String, Object?>{
         'high_severity_issues': highSeverityIssues,
         'hotspot_count': topHotspots.length,
-        'total_debt_indicators': files.length,
+        'total_debt_indicators': files.length + debtFindings.length,
+        'debt_findings_by_category': categoryCounts,
+        'debt_findings_by_severity': severityCounts,
       },
       'metadata': metadata.toJson(),
       'config': config.toJson(),
@@ -582,6 +635,7 @@ class SherpaReport {
           topHotspots.map((FileReportEntry e) => e.toJson()).toList(),
       'directory_summaries':
           directories.map((DirectorySummary d) => d.toJson()).toList(),
+      'debt_findings': debtFindings.map((DebtFinding f) => f.toJson()).toList(),
       'violations': violations,
       'baseline_delta': baselineDelta,
     };

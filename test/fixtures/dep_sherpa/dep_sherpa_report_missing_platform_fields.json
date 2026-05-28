@@ -1,0 +1,15 @@
+{
+  "platformReadiness": {},
+  "dependencies": [
+    {
+      "dependency": {
+        "node": {
+          "name": "plain_package"
+        }
+      }
+    }
+  ],
+  "unknownField": {
+    "ignored": true
+  }
+}

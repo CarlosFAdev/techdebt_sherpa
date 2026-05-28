@@ -69,6 +69,9 @@ class CliApp {
           stderr.writeln('Unknown command: ${command.name}');
           return ExitCodes.usage;
       }
+    } on FormatException catch (e) {
+      logger.error(e.message);
+      return ExitCodes.usage;
     } catch (e, st) {
       logger.error('$e\n$st');
       return ExitCodes.analysisFailed;
@@ -117,6 +120,10 @@ class CliApp {
     )
     ..addOption('out', defaultsTo: 'reports')
     ..addOption('baseline')
+    ..addOption(
+      'dep-sherpa-report',
+      help: 'Path to a dep_sherpa JSON report to import platform debt.',
+    )
     ..addOption('since')
     ..addOption('until')
     ..addOption('commit-range')
@@ -442,6 +449,9 @@ class CliApp {
     );
 
     final List<String> violations = _collectViolations(scored.files);
+    final List<DebtFinding> debtFindings = _loadDepSherpaFindings(
+      args['dep-sherpa-report'] as String?,
+    );
 
     final SherpaReport report = SherpaReport(
       metadata: ReportMetadata(
@@ -457,6 +467,7 @@ class CliApp {
       topHotspots: scored.hotspots,
       directories: scored.directories,
       violations: violations,
+      debtFindings: debtFindings,
       baselineDelta: baselineDelta,
     );
 
@@ -617,6 +628,15 @@ class CliApp {
       'global_scores': global.toJson(),
       'files': files.map((FileReportEntry e) => e.toJson()).toList(),
     });
+  }
+
+  List<DebtFinding> _loadDepSherpaFindings(String? reportPath) {
+    if (reportPath == null || reportPath.isEmpty) {
+      return const <DebtFinding>[];
+    }
+    final DepSherpaReportService service = DepSherpaReportService(_fs);
+    final DepSherpaReportInput report = service.read(reportPath);
+    return service.findingsFromReport(report);
   }
 
   List<String> _collectViolations(List<FileReportEntry> files) {

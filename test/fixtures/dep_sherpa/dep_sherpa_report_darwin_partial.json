@@ -1,0 +1,51 @@
+{
+  "platformReadiness": {
+    "darwin": {
+      "mode": "advisory",
+      "applicable": true,
+      "dependencyManager": "mixed",
+      "spmReadiness": "partial",
+      "summary": {
+        "ready": 0,
+        "partial": 1,
+        "blocked": 0,
+        "notApplicable": 0,
+        "unknown": 0
+      },
+      "enforcement": {
+        "enabled": false,
+        "violated": false,
+        "hardRiskTriggers": [],
+        "violationMessages": [],
+        "blockedCount": 0,
+        "partialCount": 1,
+        "warningFindingCount": 2,
+        "errorFindingCount": 0
+      }
+    }
+  },
+  "dependencies": [
+    {
+      "dependency": {
+        "node": {
+          "name": "partial_plugin"
+        }
+      },
+      "platformCompatibility": {
+        "darwin": {
+          "applicable": true,
+          "platforms": ["darwin"],
+          "dependencyManager": "mixed",
+          "spmReadiness": "partial",
+          "signals": [
+            "darwin.plugin.spm_partial_layout",
+            "darwin.plugin.privacy_manifest_spm_resource_missing",
+            "darwin.plugin.pigeon_legacy_swift_output",
+            "darwin.plugin.spm_gitignore_missing"
+          ],
+          "recommendations": []
+        }
+      }
+    }
+  ]
+}

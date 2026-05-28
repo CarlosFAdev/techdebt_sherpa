@@ -81,4 +81,47 @@ void main() {
         const LocalFileSystem().file(p.join('test', 'goldens', 'report.md'));
     expect(md, golden.readAsStringSync());
   });
+
+  test('markdown includes Platform Migration Debt section when findings exist',
+      () {
+    final SherpaReport report = SherpaReport(
+      metadata: ReportMetadata(
+        version: '0.1.0',
+        timestamp: DateTime.parse('2026-03-01T00:00:00Z'),
+        configHash: 'abc',
+        gitHead: 'head',
+        schemaVersion: 'v1',
+      ),
+      config: SherpaConfig.defaults(),
+      global: const GlobalScores(
+        debt: 0,
+        risk: 0,
+        evolvability: 100,
+        totals: <String, num>{'files': 0, 'sloc': 0},
+      ),
+      files: const <FileReportEntry>[],
+      topHotspots: const <FileReportEntry>[],
+      directories: const <DirectorySummary>[],
+      violations: const <String>[],
+      debtFindings: const <DebtFinding>[
+        DebtFinding(
+          category: 'platform_migration_debt',
+          severity: 'high',
+          message:
+              'Project has blocked iOS/macOS Swift Package Manager readiness dependencies.',
+          recommendation:
+              'Review blocked dependencies in the dep_sherpa report and plan SPM migration work.',
+          source: 'dep_sherpa',
+          dependency: 'blocked_plugin',
+          signals: <String>['darwin.plugin.spm_missing'],
+        ),
+      ],
+    );
+
+    final String md = ReportService().renderMarkdown(report);
+
+    expect(md, contains('## Platform Migration Debt'));
+    expect(md, contains('blocked_plugin'));
+    expect(md, contains('darwin.plugin.spm_missing'));
+  });
 }

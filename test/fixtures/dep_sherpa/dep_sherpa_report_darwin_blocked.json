@@ -1,0 +1,46 @@
+{
+  "platformReadiness": {
+    "darwin": {
+      "mode": "advisory",
+      "applicable": true,
+      "dependencyManager": "cocoapods",
+      "spmReadiness": "blocked",
+      "summary": {
+        "ready": 0,
+        "partial": 0,
+        "blocked": 1,
+        "notApplicable": 0,
+        "unknown": 0
+      },
+      "enforcement": {
+        "enabled": false,
+        "violated": false,
+        "hardRiskTriggers": [],
+        "violationMessages": [],
+        "blockedCount": 1,
+        "partialCount": 0,
+        "warningFindingCount": 0,
+        "errorFindingCount": 1
+      }
+    }
+  },
+  "dependencies": [
+    {
+      "dependency": {
+        "node": {
+          "name": "blocked_plugin"
+        }
+      },
+      "platformCompatibility": {
+        "darwin": {
+          "applicable": true,
+          "platforms": ["ios", "macos"],
+          "dependencyManager": "cocoapods",
+          "spmReadiness": "blocked",
+          "signals": ["darwin.plugin.spm_missing"],
+          "recommendations": ["Add Package.swift."]
+        }
+      }
+    }
+  ]
+}

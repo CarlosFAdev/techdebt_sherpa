@@ -38,3 +38,10 @@ scoring:
       include_top_hotspots: 20
       include_per_directory_summary: true
 ```
+
+## Optional external reports
+
+`scan --dep-sherpa-report <path>` consumes an existing dep_sherpa JSON report
+and adds `platform_migration_debt` findings for dep_sherpa Darwin iOS/macOS
+Swift Package Manager readiness signals. The command does not run dep_sherpa or
+perform SPM analysis itself.

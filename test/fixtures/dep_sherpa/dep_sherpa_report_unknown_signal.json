@@ -1,0 +1,46 @@
+{
+  "platformReadiness": {
+    "darwin": {
+      "mode": "advisory",
+      "applicable": true,
+      "dependencyManager": "unknown",
+      "spmReadiness": "unknown",
+      "summary": {
+        "ready": 0,
+        "partial": 0,
+        "blocked": 0,
+        "notApplicable": 0,
+        "unknown": 1
+      },
+      "enforcement": {
+        "enabled": false,
+        "violated": false,
+        "hardRiskTriggers": [],
+        "violationMessages": [],
+        "blockedCount": 0,
+        "partialCount": 0,
+        "warningFindingCount": 1,
+        "errorFindingCount": 0
+      }
+    }
+  },
+  "dependencies": [
+    {
+      "dependency": {
+        "node": {
+          "name": "future_plugin"
+        }
+      },
+      "platformCompatibility": {
+        "darwin": {
+          "applicable": true,
+          "platforms": ["ios"],
+          "dependencyManager": "unknown",
+          "spmReadiness": "unknown",
+          "signals": ["darwin.plugin.future_signal"],
+          "recommendations": []
+        }
+      }
+    }
+  ]
+}

@@ -61,3 +61,13 @@ scoring:
       include_top_hotspots: 20
       include_per_directory_summary: true
 ```
+
+## Optional external reports
+
+`scan` accepts `--dep-sherpa-report <path>` to consume an existing
+`dep_sherpa_report.json` file. This is a CLI input, not a YAML config key.
+
+When provided, techdebt_sherpa reads dep_sherpa Darwin iOS/macOS Swift Package
+Manager readiness fields and emits additive `platform_migration_debt` findings.
+It does not run dep_sherpa, invoke Xcode, invoke CocoaPods, invoke Swift Package
+Manager, or duplicate dep_sherpa analysis rules.

@@ -29,6 +29,23 @@
     "files": {"type": "array", "items": {"type": "object"}},
     "top_hotspots": {"type": "array", "items": {"type": "object"}},
     "directory_summaries": {"type": "array", "items": {"type": "object"}},
+    "debt_findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["category", "severity", "message", "recommendation"],
+        "properties": {
+          "category": {"type": "string"},
+          "severity": {"type": "string"},
+          "message": {"type": "string"},
+          "recommendation": {"type": "string"},
+          "source": {"type": ["string", "null"]},
+          "dependency": {"type": ["string", "null"]},
+          "signals": {"type": "array", "items": {"type": "string"}},
+          "details": {"type": "object"}
+        }
+      }
+    },
     "violations": {"type": "array", "items": {"type": "string"}},
     "baseline_delta": {"type": ["object", "null"]}
   }

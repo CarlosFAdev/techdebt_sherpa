@@ -1,0 +1,46 @@
+{
+  "platformReadiness": {
+    "darwin": {
+      "mode": "advisory",
+      "applicable": true,
+      "dependencyManager": "swiftPackageManager",
+      "spmReadiness": "ready",
+      "summary": {
+        "ready": 1,
+        "partial": 0,
+        "blocked": 0,
+        "notApplicable": 0,
+        "unknown": 0
+      },
+      "enforcement": {
+        "enabled": false,
+        "violated": false,
+        "hardRiskTriggers": [],
+        "violationMessages": [],
+        "blockedCount": 0,
+        "partialCount": 0,
+        "warningFindingCount": 0,
+        "errorFindingCount": 0
+      }
+    }
+  },
+  "dependencies": [
+    {
+      "dependency": {
+        "node": {
+          "name": "ready_plugin"
+        }
+      },
+      "platformCompatibility": {
+        "darwin": {
+          "applicable": true,
+          "platforms": ["ios"],
+          "dependencyManager": "swiftPackageManager",
+          "spmReadiness": "ready",
+          "signals": [],
+          "recommendations": []
+        }
+      }
+    }
+  ]
+}

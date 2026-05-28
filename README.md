@@ -31,6 +31,29 @@ Canonical report files written by `scan`:
 - `reports/techdebt_sherpa.json`
 - `reports/techdebt_sherpa.md`
 
+### Optional dep_sherpa integration
+
+`techdebt_sherpa` can optionally consume a `dep_sherpa_report.json` file and
+turn dep_sherpa Darwin iOS/macOS Swift Package Manager readiness findings into
+`platform_migration_debt`.
+
+This feature does not run `dep_sherpa` automatically and does not perform SPM
+analysis itself. It only reads the additive Darwin readiness fields already
+reported by `dep_sherpa`.
+
+Example workflow:
+
+```bash
+# Run dep_sherpa first and write reports/dep_sherpa_report.json.
+techdebt_sherpa scan \
+  --dep-sherpa-report reports/dep_sherpa_report.json \
+  --format both \
+  --out reports
+```
+
+When platform migration findings exist, JSON output includes `debt_findings`
+entries and Markdown output includes a `Platform Migration Debt` section.
+
 ## Commands
 
 ```text

@@ -2,6 +2,7 @@ export 'analyzer_service.dart';
 export 'cache_service.dart';
 export 'config_service.dart';
 export 'coverage_service.dart';
+export 'dep_sherpa_report_service.dart';
 export 'discovery_service.dart';
 export 'git_service.dart';
 export 'report_service.dart';

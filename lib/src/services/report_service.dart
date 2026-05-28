@@ -82,6 +82,13 @@ class ReportService {
       b.writeln();
     }
 
+    final List<DebtFinding> platformFindings = report.debtFindings
+        .where((DebtFinding f) => f.category == 'platform_migration_debt')
+        .toList(growable: false);
+    if (platformFindings.isNotEmpty) {
+      _writePlatformMigrationDebt(b, platformFindings);
+    }
+
     b.writeln('## Threshold Violations');
     b.writeln();
     if (report.violations.isEmpty) {
@@ -96,6 +103,38 @@ class ReportService {
     }
 
     return b.toString();
+  }
+
+  void _writePlatformMigrationDebt(
+    StringBuffer b,
+    List<DebtFinding> findings,
+  ) {
+    final Set<String> affectedDependencies = findings
+        .map((DebtFinding f) => f.dependency)
+        .whereType<String>()
+        .where((String dependency) => dependency.isNotEmpty)
+        .toSet();
+    final bool enforcementViolated = findings.any((DebtFinding finding) =>
+        finding.message.contains('enforcement was violated'));
+
+    b.writeln('## Platform Migration Debt');
+    b.writeln();
+    b.writeln('- Findings: `${findings.length}`');
+    b.writeln(
+      '- Affected dependencies: `${affectedDependencies.isEmpty ? 'n/a' : affectedDependencies.join(', ')}`',
+    );
+    b.writeln('- dep_sherpa enforcement violated: `$enforcementViolated`');
+    b.writeln();
+    b.writeln('| Severity | Dependency | Signals | Recommendation |');
+    b.writeln('|---|---|---|---|');
+    for (final DebtFinding finding in findings) {
+      b.writeln(
+        '| ${finding.severity} | ${finding.dependency ?? 'project'} | '
+        '${finding.signals.isEmpty ? 'n/a' : finding.signals.join(', ')} | '
+        '${finding.recommendation} |',
+      );
+    }
+    b.writeln();
   }
 
   /// Computes baseline deltas between two reports.

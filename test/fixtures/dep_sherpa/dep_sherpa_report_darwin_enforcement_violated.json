@@ -1,0 +1,28 @@
+{
+  "platformReadiness": {
+    "darwin": {
+      "mode": "ci",
+      "applicable": true,
+      "dependencyManager": "mixed",
+      "spmReadiness": "blocked",
+      "summary": {
+        "ready": 0,
+        "partial": 0,
+        "blocked": 1,
+        "notApplicable": 0,
+        "unknown": 0
+      },
+      "enforcement": {
+        "enabled": true,
+        "violated": true,
+        "hardRiskTriggers": ["blocked_dependencies"],
+        "violationMessages": ["1 dependency is blocked for SPM readiness."],
+        "blockedCount": 1,
+        "partialCount": 0,
+        "warningFindingCount": 0,
+        "errorFindingCount": 1
+      }
+    }
+  },
+  "dependencies": []
+}

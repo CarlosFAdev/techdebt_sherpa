@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-05-28
+
+### Added
+- Added optional `scan --dep-sherpa-report <path>` support for consuming dep_sherpa Darwin iOS/macOS Swift Package Manager readiness fields.
+- Added additive `platform_migration_debt` findings in JSON and Markdown reports for blocked, partial, enforcement, and warning readiness signals reported by dep_sherpa.
+
+### Fixed
+- Relaxed the `analyzer` constraint to include `13.x` releases so pub.dev scoring stays current with the latest stable analyzer.
+
 ## [0.2.0] - 2026-04-21
 
 ### Changed

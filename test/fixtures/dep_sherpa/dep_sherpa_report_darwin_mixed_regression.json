@@ -1,0 +1,46 @@
+{
+  "platformReadiness": {
+    "darwin": {
+      "mode": "advisory",
+      "applicable": true,
+      "dependencyManager": "mixed",
+      "spmReadiness": "partial",
+      "summary": {
+        "ready": 0,
+        "partial": 1,
+        "blocked": 0,
+        "notApplicable": 0,
+        "unknown": 0
+      },
+      "enforcement": {
+        "enabled": false,
+        "violated": false,
+        "hardRiskTriggers": [],
+        "violationMessages": [],
+        "blockedCount": 0,
+        "partialCount": 1,
+        "warningFindingCount": 0,
+        "errorFindingCount": 1
+      }
+    }
+  },
+  "dependencies": [
+    {
+      "dependency": {
+        "node": {
+          "name": "mixed_plugin"
+        }
+      },
+      "platformCompatibility": {
+        "darwin": {
+          "applicable": true,
+          "platforms": ["ios"],
+          "dependencyManager": "mixed",
+          "spmReadiness": "partial",
+          "signals": ["darwin.plugin.cocoapods_regression_risk"],
+          "recommendations": []
+        }
+      }
+    }
+  ]
+}

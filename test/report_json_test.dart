@@ -93,14 +93,26 @@ void main() {
       topHotspots: const <FileReportEntry>[],
       directories: const <DirectorySummary>[],
       violations: const <String>['lib/a.dart:cyclomatic_fail'],
+      debtFindings: const <DebtFinding>[
+        DebtFinding(
+          category: 'platform_migration_debt',
+          severity: 'high',
+          message: 'Project has blocked iOS/macOS SPM readiness dependencies.',
+          recommendation: 'Review blocked dependencies.',
+          source: 'dep_sherpa',
+        ),
+      ],
     );
 
     final json = report.toJson();
     expect(json['schema_version'], '0.1.0');
     expect(json['summary'], {
-      'high_severity_issues': 1,
+      'high_severity_issues': 2,
       'hotspot_count': 0,
-      'total_debt_indicators': 2,
+      'total_debt_indicators': 3,
+      'debt_findings_by_category': {'platform_migration_debt': 1},
+      'debt_findings_by_severity': {'high': 1},
     });
+    expect(json['debt_findings'], hasLength(1));
   });
 }
