@@ -3,13 +3,14 @@ import 'package:file/local.dart';
 import 'package:path/path.dart' as p;
 import 'package:techdebt_sherpa/src/domain/models.dart';
 import 'package:techdebt_sherpa/src/services/report_service.dart';
+import 'package:techdebt_sherpa/src/version.dart';
 import 'package:test/test.dart';
 
 void main() {
   test('markdown rendering matches golden', () {
     final SherpaReport report = SherpaReport(
       metadata: ReportMetadata(
-        version: '0.1.0',
+        version: techdebtSherpaVersion,
         timestamp: DateTime.parse('2026-03-01T00:00:00Z'),
         configHash: 'abc',
         gitHead: 'head',
@@ -86,7 +87,7 @@ void main() {
       () {
     final SherpaReport report = SherpaReport(
       metadata: ReportMetadata(
-        version: '0.1.0',
+        version: techdebtSherpaVersion,
         timestamp: DateTime.parse('2026-03-01T00:00:00Z'),
         configHash: 'abc',
         gitHead: 'head',

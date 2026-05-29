@@ -10,6 +10,7 @@ import '../adapters/process_runner.dart';
 import '../domain/models.dart';
 import '../services/services.dart';
 import '../utils/hash_utils.dart';
+import '../version.dart';
 import 'exit_codes.dart';
 
 class CliApp {
@@ -20,7 +21,7 @@ class CliApp {
   final FileSystemAdapter _fs;
   final ProcessRunner _runner;
   final ReportDiffService _reportDiffService = ReportDiffService();
-  static const String toolVersion = '0.1.0';
+  static const String toolVersion = techdebtSherpaVersion;
   static const String schemaVersion = 'v1';
 
   Future<int> run(List<String> args) async {

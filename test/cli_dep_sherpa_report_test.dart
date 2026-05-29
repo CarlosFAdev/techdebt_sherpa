@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:techdebt_sherpa/src/cli/cli_app.dart';
 import 'package:techdebt_sherpa/src/cli/exit_codes.dart';
+import 'package:techdebt_sherpa/src/version.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -26,6 +27,9 @@ void main() {
 
       expect(exitCode, ExitCodes.success);
       final json = _readReport(outDir);
+      final metadata = json['metadata'] as Map<String, dynamic>;
+      expect(metadata['tool_version'], techdebtSherpaVersion);
+      expect(metadata['tool_version'], isNot('0.1.0'));
       expect(json['debt_findings'], isEmpty);
     });
 

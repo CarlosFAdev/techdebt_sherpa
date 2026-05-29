@@ -1,11 +1,12 @@
 import 'package:techdebt_sherpa/src/domain/models.dart';
+import 'package:techdebt_sherpa/src/version.dart';
 import 'package:test/test.dart';
 
 void main() {
   test('json report includes audit_sherpa summary fields', () {
     final report = SherpaReport(
       metadata: ReportMetadata(
-        version: '0.1.0',
+        version: techdebtSherpaVersion,
         timestamp: DateTime.parse('2026-03-01T00:00:00Z'),
         configHash: 'abc',
         gitHead: 'head',
@@ -105,7 +106,10 @@ void main() {
     );
 
     final json = report.toJson();
+    final metadata = json['metadata'] as Map<String, Object?>;
     expect(json['schema_version'], '0.1.0');
+    expect(metadata['tool_version'], techdebtSherpaVersion);
+    expect(metadata['tool_version'], isNot('0.1.0'));
     expect(json['summary'], {
       'high_severity_issues': 2,
       'hotspot_count': 0,

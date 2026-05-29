@@ -11,6 +11,8 @@ The package uses a modular clean design:
   - `ReportService`: JSON + Markdown report rendering.
   - `SnapshotService`: persisted timestamped snapshots.
   - `TrendService`: trend generation from snapshots.
+- `version.dart`: package/tool version constant used by CLI orchestration,
+  cache keying, and generated report metadata.
 - `adapters/`: process runner, file system, logger.
 - `cli/`: command parser and command orchestration.
 

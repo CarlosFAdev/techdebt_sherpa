@@ -6,3 +6,4 @@
 export 'src/cli/exit_codes.dart';
 export 'src/domain/models.dart';
 export 'src/services/services.dart';
+export 'src/version.dart';

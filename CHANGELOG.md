@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved `diff` command UX with clearer help and README examples.
 - Improved command examples and documentation for local suite workflows.
 
+### Fixed
+- Fixed generated report metadata to emit the current `techdebt_sherpa` package version instead of stale `0.1.0`.
+
 ## [0.3.0] - 2026-05-28
 
 ### Added
