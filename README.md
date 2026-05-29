@@ -24,6 +24,7 @@ techdebt_sherpa --help
 
 ```bash
 techdebt_sherpa scan --format both --out reports
+dart run techdebt_sherpa scan --format json --out reports/tech --dep-sherpa-report reports/dep/dep_sherpa.json
 ```
 
 Canonical report files written by `scan`:
@@ -44,15 +45,20 @@ reported by `dep_sherpa`.
 Example workflow:
 
 ```bash
-# Run dep_sherpa first and write reports/dep_sherpa_report.json.
+# Run dep_sherpa first and write reports/dep/dep_sherpa.json.
+dart run dep_sherpa scan --format json --out reports/dep
+
 techdebt_sherpa scan \
-  --dep-sherpa-report reports/dep_sherpa_report.json \
-  --format both \
-  --out reports
+  --dep-sherpa-report reports/dep/dep_sherpa.json \
+  --format json \
+  --out reports/tech
 ```
 
 When platform migration findings exist, JSON output includes `debt_findings`
 entries and Markdown output includes a `Platform Migration Debt` section.
+No Xcode, CocoaPods, Swift Package Manager, or macOS is required for this static
+workflow. `dep_sherpa` remains the source of truth for Darwin readiness, and
+`techdebt_sherpa` uses that data as platform migration debt.
 
 ## Commands
 
@@ -60,9 +66,17 @@ entries and Markdown output includes a `Platform Migration Debt` section.
 techdebt_sherpa scan [options]
 techdebt_sherpa rank [options]
 techdebt_sherpa diff --left <report.json> --right <report.json> [options]
+techdebt_sherpa diff <left-report.json> <right-report.json> [options]
 techdebt_sherpa snapshot [options]
 techdebt_sherpa trend [options]
 techdebt_sherpa explain [options]
+```
+
+Diff examples:
+
+```bash
+techdebt_sherpa diff --left reports/old/techdebt_sherpa.json --right reports/new/techdebt_sherpa.json --format json
+techdebt_sherpa diff reports/old/techdebt_sherpa.json reports/new/techdebt_sherpa.json --format json
 ```
 
 ## Documentation

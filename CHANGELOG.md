@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added positional path aliases for `diff`, allowing `techdebt_sherpa diff old.json new.json --format json`.
+
+### Changed
+- Improved `diff` command UX with clearer help and README examples.
+- Improved command examples and documentation for local suite workflows.
+
 ## [0.3.0] - 2026-05-28
 
 ### Added

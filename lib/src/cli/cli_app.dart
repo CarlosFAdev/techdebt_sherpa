@@ -44,6 +44,9 @@ class CliApp {
       stdout.writeln('techdebt_sherpa ${command.name} [options]');
       stdout.writeln();
       stdout.writeln(parser.commands[command.name]?.usage ?? '');
+      if (command.name == 'diff') {
+        _printDiffExamples();
+      }
       return ExitCodes.success;
     }
     final Logger logger = Logger(
@@ -167,8 +170,8 @@ class CliApp {
 
   ArgParser _diffParser() => ArgParser()
     ..addFlag('help', abbr: 'h', negatable: false)
-    ..addOption('left')
-    ..addOption('right')
+    ..addOption('left', help: 'Path to the older techdebt_sherpa JSON report.')
+    ..addOption('right', help: 'Path to the newer techdebt_sherpa JSON report.')
     ..addOption(
       'format',
       defaultsTo: 'both',
@@ -266,14 +269,12 @@ class CliApp {
   }
 
   int _runDiff(ArgResults args, Logger logger) {
-    final String? leftPath = args['left'] as String?;
-    final String? rightPath = args['right'] as String?;
-    if (leftPath == null || rightPath == null) {
-      logger.error('diff requires --left and --right');
+    final _DiffInputs? inputs = _resolveDiffInputs(args, logger);
+    if (inputs == null) {
       return ExitCodes.usage;
     }
-    final Map<String, Object?> left = _readJsonFile(leftPath);
-    final Map<String, Object?> right = _readJsonFile(rightPath);
+    final Map<String, Object?> left = _readJsonFile(inputs.leftPath);
+    final Map<String, Object?> right = _readJsonFile(inputs.rightPath);
 
     final Map<String, Object?> delta =
         _reportDiffService.fromJsonMaps(left, right);
@@ -303,6 +304,44 @@ class CliApp {
       }
     }
     return ExitCodes.success;
+  }
+
+  _DiffInputs? _resolveDiffInputs(ArgResults args, Logger logger) {
+    final String? leftPath = args['left'] as String?;
+    final String? rightPath = args['right'] as String?;
+    final List<String> positional = args.rest;
+    final bool hasExplicitPath = leftPath != null || rightPath != null;
+
+    if (positional.isNotEmpty && hasExplicitPath) {
+      logger.error(
+        'Choose either positional paths or --left/--right, not both.\n'
+        'Usage: techdebt_sherpa diff --left old.json --right new.json --format json\n'
+        '   or: techdebt_sherpa diff old.json new.json --format json',
+      );
+      return null;
+    }
+
+    if (positional.isNotEmpty) {
+      if (positional.length == 2) {
+        return _DiffInputs(positional[0], positional[1]);
+      }
+      logger.error(
+        'diff expects exactly two positional paths: <left.json> <right.json>.\n'
+        'Usage: techdebt_sherpa diff old.json new.json --format json',
+      );
+      return null;
+    }
+
+    if (leftPath == null || rightPath == null) {
+      logger.error(
+        'diff requires both --left and --right, or exactly two positional paths.\n'
+        'Usage: techdebt_sherpa diff --left old.json --right new.json --format json\n'
+        '   or: techdebt_sherpa diff old.json new.json --format json',
+      );
+      return null;
+    }
+
+    return _DiffInputs(leftPath, rightPath);
   }
 
   Future<int> _runSnapshot(ArgResults args, Logger logger) async {
@@ -383,6 +422,17 @@ class CliApp {
     defs.forEach(
         (String key, String value) => stdout.writeln('- $key: $value'));
     return ExitCodes.success;
+  }
+
+  void _printDiffExamples() {
+    stdout.writeln();
+    stdout.writeln('Examples:');
+    stdout.writeln(
+      '  techdebt_sherpa diff --left reports/old/techdebt_sherpa.json --right reports/new/techdebt_sherpa.json --format json',
+    );
+    stdout.writeln(
+      '  techdebt_sherpa diff reports/old/techdebt_sherpa.json reports/new/techdebt_sherpa.json --format json',
+    );
   }
 
   Future<_ScanOutcome> _scanInternal(
@@ -683,6 +733,13 @@ class _ScanOutcome {
   const _ScanOutcome(this.report);
 
   final SherpaReport report;
+}
+
+class _DiffInputs {
+  const _DiffInputs(this.leftPath, this.rightPath);
+
+  final String leftPath;
+  final String rightPath;
 }
 
 class _IncludeExclude {
