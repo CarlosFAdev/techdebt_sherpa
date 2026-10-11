@@ -20,6 +20,18 @@ dart pub global activate techdebt_sherpa
 techdebt_sherpa --help
 ```
 
+Use a current stable Dart SDK when installing the CLI. Pub selects dependency
+versions compatible with your SDK and the package constraints.
+
+### Version 0.4.1
+
+The analyzer constraint is `>=8.0.0 <15.0.0`, allowing analyzer 14.5.0 while
+retaining compatibility with analyzer 8.x. This patch changes dependency
+compatibility; CLI commands, scoring, and report schemas remain unchanged.
+Local release validation on Dart 3.13.5 achieved **160/160 pana points** and
+passed all 33 tests. The [pub.dev score](https://pub.dev/packages/techdebt_sherpa/score)
+reflects pub.dev's separate analysis of the published package.
+
 ## Quick Start
 
 ```bash
@@ -84,6 +96,9 @@ techdebt_sherpa diff reports/old/techdebt_sherpa.json reports/new/techdebt_sherp
 - [Configuration Reference](doc/config-reference.md)
 - [Troubleshooting](doc/troubleshooting.md)
 - [Scoring Model](doc/scoring-model.md)
+- [Architecture](doc/architecture.md)
+- [Metrics Definitions](doc/metrics.md)
+- [JSON Schema](doc/json_schema.md)
 - [Pub Score Playbook](doc/pub_score_playbook.md)
 
 ## Part of the Flutter Sherpa Suite
